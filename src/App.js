@@ -1,7 +1,10 @@
 import { Alchemy, Network } from 'alchemy-sdk';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import './App.css';
+import Header from './components/Header';
+import LastBlockInfo from './components/LastBlockInfo';
+import SearchTx from './components/SearchTx';
 
 // Refer to the README doc for more information about using API
 // keys in client-side code. You should never do this in production
@@ -20,17 +23,32 @@ const settings = {
 const alchemy = new Alchemy(settings);
 
 function App() {
-  const [blockNumber, setBlockNumber] = useState();
-
+  const [blockNumber, setBlockNumber] = useState(null);
+  const [blockInfo, setBlockInfo] = useState(null);
   useEffect(() => {
-    async function getBlockNumber() {
-      setBlockNumber(await alchemy.core.getBlockNumber());
-    }
-
     getBlockNumber();
-  });
-
-  return <div className="App">Block Number: {blockNumber}</div>;
+  }, []);
+  const getBlockNumber = async () => {
+    try {
+      const blockNumber = await alchemy.core.getBlockNumber();
+      console.log(blockNumber);
+      setBlockNumber(blockNumber);
+      const blockInfo = await alchemy.core.getBlock(blockNumber);
+      console.log(blockInfo);
+      setBlockInfo(blockInfo);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  return (
+    <div className='container'>
+      <Header />
+      <SearchTx/>
+      <LastBlockInfo
+        blockInfo={blockInfo}
+      />
+    </div>
+  )
 }
 
 export default App;
